@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acoustic X-Ray | Pro Series</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --neon-blue: #00f2ff; --neon-pink: #ff007b; --gold: #ffcc00;
+            --glass: rgba(0, 242, 255, 0.05); --panel-border: rgba(0, 242, 255, 0.3);
+        }
+
+        /* --- GLOBAL UPDATES FOR RESPONSIVENESS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            min-height: 100vh; 
+            background: radial-gradient(circle at center, #0a1114, #000);
+            overflow-y: auto; /* Allows scrolling */
+            font-family: 'Rajdhani', sans-serif; 
+            color: #fff;
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            padding-top: 80px; /* Space for the back button */
+        }
+
+        /* --- HOME / BACK BUTTON --- */
+        .home-nav {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 10px 20px;
+            font-family: 'Orbitron';
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 4px;
+        }
+        .back-btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* --- UPDATED GRID SYSTEM --- */
+        .hud-interface {
+            display: grid; 
+            grid-template-columns: 1fr; /* Stacked by default on mobile */
+            width: 95vw; 
+            max-width: 1400px;
+            gap: 25px; 
+            z-index: 10;
+        }
+
+        /* Desktop Layout (Standard 3-column) */
+        @media (min-width: 1024px) {
+            .hud-interface {
+                grid-template-columns: 420px 250px 1fr;
+                height: 85vh;
+                align-items: stretch;
+            }
+        }
+
+        /* --- TERMINAL PANEL --- */
+        .info-panel {
+            background: var(--glass); border: 1px solid var(--panel-border);
+            border-radius: 12px; padding: 30px; backdrop-filter: blur(25px);
+            display: flex; flex-direction: column; box-shadow: 0 0 40px rgba(0,0,0,0.6);
+            min-height: 400px;
+        }
+
+        .terminal-header { font-family: 'Orbitron'; font-size: 12px; color: var(--neon-blue); letter-spacing: 4px; margin-bottom: 25px; opacity: 0.8; }
+        #part-title { font-family: 'Orbitron'; font-size: 2rem; color: #fff; margin-bottom: 20px; text-shadow: 0 0 15px var(--neon-blue); }
+        #part-desc { font-size: 1.1rem; line-height: 1.6; color: #d1eeee; transition: 0.3s; }
+        .feature-box { margin-top: 15px; border-left: 3px solid var(--neon-pink); padding-left: 18px; font-size: 1rem; color: #ff99ca; }
+
+        /* --- SMARTPHONE --- */
+        .smartphone {
+            width: 200px; height: 400px; background: #050505; border: 3px solid #333;
+            border-radius: 30px; padding: 12px; display: flex; flex-direction: column;
+            box-shadow: 0 0 25px rgba(0,0,0,1); justify-self: center;
+        }
+        .phone-screen {
+            flex: 1; background: #000; border-radius: 22px; overflow: hidden;
+            display: flex; flex-direction: column; border: 1px solid #111;
+        }
+        .bt-icon { width: 10px; height: 10px; background: #333; border-radius: 50%; margin: 5px 10px 0 auto; transition: 0.3s; }
+        .bt-icon.active { background: var(--neon-blue); box-shadow: 0 0 8px var(--neon-blue); }
+        .app-content { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        .song-btn {
+            background: #111; border: 1px solid #222; color: #555; padding: 12px;
+            font-size: 10px; font-family: 'Orbitron'; cursor: pointer; border-radius: 8px;
+        }
+        .song-btn.active { color: var(--neon-blue); border-color: var(--neon-blue); }
+        .bt-master-btn {
+            margin-top: auto; background: transparent; border: 1px solid var(--neon-pink);
+            color: var(--neon-pink); padding: 12px; font-size: 10px; font-family: 'Orbitron';
+            cursor: pointer; border-radius: 12px; transition: 0.3s;
+        }
+        .bt-master-btn.connected { background: var(--neon-pink); color: #000; }
+
+        /* --- SPEAKER & X-RAY --- */
+        .stage-area { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 500px; }
+        .speaker-enclosure {
+            width: 280px; height: 400px; background: #111; border-radius: 20px;
+            border: 4px solid #222; display: flex; flex-direction: column;
+            align-items: center; justify-content: space-around; padding: 40px 0; cursor: pointer;
+            transition: all 0.5s ease;
+        }
+        .woofer-hole { width: 160px; height: 160px; background: radial-gradient(#1a1a1a, #050505); border-radius: 50%; border: 3px solid #252525; }
+        .vibrating .woofer-hole { animation: throb 0.1s infinite alternate; }
+        @keyframes throb { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        /* X-RAY MOBILE ADAPTATION */
+        .xray-active .speaker-enclosure { 
+            background: transparent; border: none; width: 100%; height: auto;
+        }
+        .component-assembly { 
+            display: none; gap: 15px; align-items: center; justify-content: center;
+            flex-wrap: wrap; /* Allows components to wrap on small screens */
+        }
+        .xray-active .component-assembly { display: flex; }
+        .xray-active .woofer-hole, .xray-active .tweeter-hole { display: none; }
+
+        .part { position: relative; cursor: help; transition: 0.3s; filter: grayscale(0.7); }
+        .part:hover { filter: grayscale(0) drop-shadow(0 0 15px var(--neon-blue)); transform: translateY(-5px); }
+        
+        /* Speaker Components Sizes */
+        .c-surround { width: 12px; height: 220px; border: 2px solid #444; border-radius: 40%; background: #222; }
+        .c-cone { width: 70px; height: 180px; background: #3d3d3d; clip-path: polygon(0 15%, 100% 0, 100% 100%, 0 85%); }
+        .c-spider { width: 30px; height: 80px; background: repeating-linear-gradient(90deg, #cd7f32 0, #cd7f32 3px, #8b4513 6px); }
+        .c-coil { width: 35px; height: 60px; background: repeating-linear-gradient(0deg, var(--gold) 0, var(--gold) 1px, #8a6d00 3px); }
+        .c-magnet { width: 60px; height: 160px; background: #222; border: 2px solid #444; border-radius: 8px; }
+
+        .hint-text { margin-top: 20px; font-size: 13px; color: var(--neon-blue); letter-spacing: 2px; opacity: 0.6; text-transform: uppercase; text-align: center;}
+    </style>
+</head>
+<body>
+
+    <nav class="home-nav">
+        <a href="home.html" class="back-btn">
+            <span>&larr;</span> EXIT TO TERMINAL
+        </a>
+    </nav>
+
+    <div class="hud-interface" id="mainHud">
+        <div class="info-panel">
+            <div class="terminal-header" id="log-status">SYSTEM_IDLE</div>
+            <div id="part-title">Speaker Fundamentals</div>
+            <div id="part-desc">
+                A speaker is a device used for playing sound from computers or other electronic devices. It converts digital or electrical signals into audible sound waves.
+            </div>
+            <div id="content-details">
+                <div class="feature-box"><strong>Acoustic Transduction:</strong> Turning electrical energy into mechanical vibrations.</div>
+                <div class="feature-box"><strong>Signal Flow:</strong> Phone (Source) &rarr; Bluetooth (Transfer) &rarr; Voice Coil (Engine) &rarr; Sound.</div>
+            </div>
+            <div style="margin-top: auto; padding-top: 20px;">
+                <button onclick="resetView()" style="background: none; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 12px; font-family: 'Orbitron'; font-size: 11px; cursor: pointer; width: 100%;">BACK TO FUNDAMENTALS</button>
+            </div>
+        </div>
+
+        <div class="smartphone">
+            <div class="phone-screen">
+                <div class="bt-icon" id="btIcon"></div>
+                <div class="app-content">
+                    <h4 style="font-size: 10px; color: #444; margin-bottom: 5px;">SOURCE_DEVICE</h4>
+                    <button class="song-btn" id="s1" onclick="playAudio('low')">01_BASS_TEST</button>
+                    <button class="song-btn" id="s2" onclick="playAudio('high')">02_FREQ_SWEEP</button>
+                    <button class="bt-master-btn" id="btBtn" onclick="toggleBT()">CONNECT BT</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stage-area">
+            <div class="speaker-enclosure" id="speaker" onclick="toggleXray()">
+                <div class="tweeter-hole" style="width:50px; height:50px; border-radius:50%; background:#222; border: 2px solid #333;"></div>
+                <div class="woofer-hole"></div>
+                <div class="component-assembly">
+                    <div class="part" onclick="scan('Surround')"><div class="c-surround"></div></div>
+                    <div class="part" onclick="scan('Cone')"><div class="c-cone"></div></div>
+                    <div class="part" onclick="scan('Spider')"><div class="c-spider"></div></div>
+                    <div class="part" onclick="scan('Voice Coil')"><div class="c-coil"></div></div>
+                    <div class="part" onclick="scan('Magnet')"><div class="c-magnet"></div></div>
+                </div>
+            </div>
+            <div class="hint-text" id="hint">Click Speaker for X-Ray Vision</div>
+        </div>
+    </div>
+
+    <audio id="audioLow" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+    <audio id="audioHigh" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"></audio>
+
+    <script>
+        let btConnected = false;
+        const descriptions = {
+            'Surround': "A piece of elastic rubber or foam that flexibly fastens the diaphragm to the basket, allowing for piston-like movement.",
+            'Cone': "The diaphragm that moves in and out to push air. This displacement is what creates the pressure waves we hear as sound.",
+            'Spider': "A corrugated support that centers the voice coil, ensuring it moves linearly without hitting the magnet walls.",
+            'Voice Coil': "The motor of the speaker. When current passes through this wire coil, it interacts with the magnet to move the cone.",
+            'Magnet': "Creates a permanent magnetic field. This provides the stationary force against which the voice coil pushes."
+        };
+
+        function toggleBT() {
+            btConnected = !btConnected;
+            const btn = document.getElementById('btBtn');
+            const icon = document.getElementById('btIcon');
+            btn.innerText = btConnected ? "BT: ONLINE" : "CONNECT BT";
+            btn.classList.toggle('connected');
+            icon.classList.toggle('active');
+            if (!btConnected) stopAllAudio();
+        }
+
+        function playAudio(type) {
+            if (!btConnected) { alert("Please connect Bluetooth on the phone first!"); return; }
+            stopAllAudio();
+            document.getElementById(type === 'low' ? 's1' : 's2').classList.add('active');
+            document.getElementById(type === 'low' ? 'audioLow' : 'audioHigh').play();
+            document.getElementById('speaker').classList.add('vibrating');
+            document.getElementById('log-status').innerText = "STREAMING_DATA";
+        }
+
+        function stopAllAudio() {
+            document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
+            document.querySelectorAll('.song-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('speaker').classList.remove('vibrating');
+            document.getElementById('log-status').innerText = "SIGNAL_IDLE";
+        }
+
+        function toggleXray() {
+            document.getElementById('mainHud').classList.toggle('xray-active');
+            const hint = document.getElementById('hint');
+            hint.innerText = document.getElementById('mainHud').classList.contains('xray-active') ? 
+                "Click parts to identify / Click background to close" : "Click Speaker for X-Ray Vision";
+        }
+
+        function scan(part) {
+            event.stopPropagation();
+            document.getElementById('part-title').innerText = part;
+            document.getElementById('part-desc').innerText = descriptions[part];
+            document.getElementById('content-details').style.display = 'none';
+        }
+
+        function resetView() {
+            document.getElementById('part-title').innerText = "Speaker Fundamentals";
+            document.getElementById('part-desc').innerHTML = "A speaker is a device used for playing sound from computers or other electronic devices. It converts digital or electrical signals into audible sound waves.";
+            document.getElementById('content-details').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

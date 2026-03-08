@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table of Contents - AI Interface</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    height:100vh;
+    background:radial-gradient(circle at center,#0f2027,#000000 70%);
+    overflow:hidden;
+    font-family:'Orbitron',sans-serif;
+    color:#00ffff;
+}
+
+/* STARS & NEBULA */
+.star{
+    position:absolute;
+    width:2px; height:2px;
+    background:white;
+    animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{ from{opacity:0.2;} to{opacity:1;} }
+
+/* AI CORE BACKGROUND */
+.brain{
+    position:absolute;
+    width:400px; height:400px;
+    border-radius:50%;
+    border:1px solid rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 60px rgba(0, 255, 255, 0.1);
+    animation:rotate 40s linear infinite;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+}
+
+@keyframes rotate{ 
+    from{transform:translate(-50%, -50%) rotate(0deg);} 
+    to{transform:translate(-50%, -50%) rotate(360deg);} 
+}
+
+/* GLASS CONTAINER */
+.container{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    backdrop-filter:blur(15px);
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 0 40px rgba(0,0,0,0.5);
+    width:90%;
+    max-width:650px;
+}
+
+h1{
+    margin-bottom:30px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    text-shadow:0 0 20px cyan;
+    animation: titleGlow 2s infinite alternate;
+}
+
+@keyframes titleGlow {
+    from { text-shadow: 0 0 10px cyan; }
+    to { text-shadow: 0 0 25px cyan, 0 0 5px white; }
+}
+
+/* ENHANCED TOPICS */
+.topic-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.topic{
+    position: relative;
+    padding: 15px;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor:pointer;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: left;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(-30px);
+}
+
+.topic.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* SCANLINE EFFECT */
+.topic::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.topic:hover::after {
+    left: 100%;
+}
+
+.topic:hover{
+    background: rgba(0, 255, 255, 0.2);
+    border-color: cyan;
+    color: white;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+    transform: scale(1.03) translateX(10px);
+}
+
+.topic span {
+    color: cyan;
+    font-weight: bold;
+    margin-right: 15px;
+    border: 1px solid cyan;
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+/* MODAL UPGRADE */
+.modal{
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    visibility:hidden;
+    opacity:0;
+    z-index: 1000;
+    transition:0.4s;
+}
+
+.modal.active{
+    visibility:visible;
+    opacity:1;
+}
+
+.modal-content{
+    background:#050505;
+    border: 1px solid cyan;
+    padding:40px;
+    border-radius:5px;
+    width:85%;
+    max-width:550px;
+    box-shadow:0 0 50px rgba(0, 255, 255, 0.3);
+    transform: translateY(50px);
+    transition: 0.4s;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+#contentText h3 {
+    color: cyan;
+    margin-bottom: 15px;
+    border-bottom: 1px solid cyan;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.close{
+    margin-top:25px;
+    padding:10px 30px;
+    border:1px solid cyan;
+    background:transparent;
+    color:cyan;
+    font-family: 'Orbitron';
+    cursor:pointer;
+    transition: 0.3s;
+}
+
+.close:hover{ background:cyan; color:black; box-shadow: 0 0 15px cyan; }
+
+/* BACK BUTTON */
+button.backHome{
+    margin-top:30px;
+    padding:12px 40px;
+    background:transparent;
+    border: 1px solid cyan;
+    color:cyan;
+    font-family: 'Orbitron';
+    font-size:14px;
+    cursor:pointer;
+    transition:0.3s;
+    letter-spacing: 2px;
+}
+
+button.backHome:hover{
+    background:cyan;
+    color:black;
+    box-shadow:0 0 30px cyan;
+}
+
+.fadeOut{ animation:zoomOut 1s forwards; }
+@keyframes zoomOut{ to{opacity:0; transform:translate(-50%,-50%) scale(1.2) rotate(2deg); filter: blur(10px);} }
+
+</style>
+</head>
+<body>
+
+<div class="brain"></div>
+
+<script>
+// Enhanced Star Generator
+for(let i=0;i<150;i++){
+    let star=document.createElement("div");
+    star.className="star";
+    star.style.top=Math.random()*100+"%";
+    star.style.left=Math.random()*100+"%";
+    star.style.animationDuration=(1+Math.random()*3)+"s";
+    star.style.opacity = Math.random();
+    document.body.appendChild(star);
+}
+</script>
+
+<div class="container">
+    <h1>📚 INDEX</h1>
+
+    <div class="topic-wrapper">
+        <div class="topic" onclick="showContent('intro')"><span>01</span> Introduction to Output Devices</div>
+        <div class="topic" onclick="showContent('monitor')"><span>02</span> Visual Display (Monitor)</div>
+        <div class="topic" onclick="showContent('printer')"><span>03</span> Hard Copy Systems (Printer)</div>
+        <div class="topic" onclick="showContent('speaker')"><span>04</span> Audio Synthesis (Speaker)</div>
+        <div class="topic" onclick="showContent('ports')"><span>05</span> Connectivity (I/O Ports)</div>
+    </div>
+
+    <button class="backHome" onclick="goHome()">BACK TO HOME</button>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-content" id="modalContent">
+        <div id="contentText"></div>
+        <button class="close" onclick="closeModal()">DISMISS</button>
+    </div>
+</div>
+
+<script>
+// Entrance Animation for Topics
+window.onload = () => {
+    const topics = document.querySelectorAll(".topic");
+    topics.forEach((t, i) => {
+        setTimeout(() => {
+            t.classList.add("show");
+        }, i * 150);
+    });
+};
+
+function showContent(type){
+    let text="";
+
+    if(type==="intro"){
+        text="<h3>OUTPUT ARCHITECTURE</h3><p>Output devices are the final stage of the computing cycle. They translate binary machine language into human-perceivable data (Visual, Auditory, or Tactile).</p>";
+    }
+
+    if(type==="monitor"){
+        text="<h3>DISPLAY TECHNOLOGIES</h3><ul style='list-style:none; line-height:2;'><li>⚡ <b>CRT:</b> Electron Beam synthesis.</li><li>💧 <b>LCD:</b> Liquid Crystal manipulation.</li><li>💡 <b>LED:</b> Diode-based backlighting.</li><li>🌌 <b>OLED:</b> Self-emissive pixels.</li></ul>";
+    }
+
+    if(type==="printer"){
+        text="<h3>MATERIALIZATION</h3><p>Printers create physical artifacts from digital models.</p><br>• <b>Inkjet:</b> Micro-droplet propulsion.<br>• <b>Laser:</b> Electrostatic toner fusion.<br>• <b>3D:</b> Additive layer synthesis.";
+    }
+
+    if(type==="speaker"){
+        text="<h3>ACOUSTIC OUTPUT</h3><p>Speakers convert electrical oscillations into mechanical vibrations to produce sound waves.</p><br>1. Stereo (2.0)<br>2. Surround (5.1/7.1)<br>3. Wireless Fidelity (Bluetooth)";
+    }
+
+    if(type==="ports"){
+        text="<h3>INTERFACE NODES</h3><p>Data transfer channels for external output.</p><br>• <b>HDMI:</b> High-Def Audio/Video.<br>• <b>USB-C:</b> Universal serial interface.<br>• <b>DP:</b> DisplayPort high-bandwidth link.";
+    }
+
+    document.getElementById("contentText").innerHTML=text;
+    document.getElementById("modal").classList.add("active");
+}
+
+function closeModal(){
+    document.getElementById("modal").classList.remove("active");
+}
+
+function goHome(){
+    document.querySelector(".container").classList.add("fadeOut");
+    setTimeout(()=>{
+        window.location.href="home.html";
+    },1000);
+}
+</script>
+
+</body>
+</html>

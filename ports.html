@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Hardware Interface | Lab V7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #03070a;
+            --panel: rgba(8, 12, 18, 0.98);
+            --sidebar: rgba(0, 0, 0, 0.7);
+            --text-main: #ffffff;
+            --text-sub: #8a9ba8;
+            --accent: #00f2ff;
+            --accent-glow: rgba(0, 242, 255, 0.15);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] {
+            --bg: #f0f4f8;
+            --panel: #ffffff;
+            --sidebar: rgba(255, 255, 255, 0.8);
+            --text-main: #1a202c;
+            --text-sub: #4a5568;
+            --accent: #0062ff;
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 320px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 30px; display: flex; flex-direction: column; z-index: 100; backdrop-filter: blur(20px); }
+        .back-btn { display: inline-block; padding: 12px; margin-bottom: 30px; border: 1px solid var(--accent); color: var(--accent); text-decoration: none; font-family: 'Orbitron'; font-size: 10px; border-radius: 4px; transition: 0.3s; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        .back-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-2px); }
+        
+        .nav-label { font-family: 'Orbitron'; font-size: 10px; color: var(--text-sub); margin: 20px 0 10px 10px; letter-spacing: 2px; opacity: 0.6; }
+        .mode-btn { width: 100%; padding: 14px 20px; background: transparent; border: none; border-left: 3px solid transparent; color: var(--text-sub); text-align: left; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; margin-bottom: 5px; font-size: 11px; letter-spacing: 1px; }
+        .mode-btn.active { color: var(--text-main); border-left-color: var(--accent); background: var(--accent-glow); }
+
+        /* --- CONTENT WRAPPER --- */
+        .main-container { flex-grow: 1; display: flex; position: relative; width: calc(100% - 320px); }
+        .viewport { flex: 1.2; display: flex; align-items: center; justify-content: center; perspective: 1200px; position: relative; transition: opacity 0.4s; }
+        .viewport.hidden { display: none; }
+
+        .content-panel { flex: 1; background: var(--panel); border-left: 1px solid var(--border); padding: 60px 40px; overflow-y: auto; scrollbar-width: thin; }
+        .content-panel.full-view { flex: 3; border-left: none; }
+
+        .header-area { margin-bottom: 40px; }
+        .header-area h1 { font-family: 'Orbitron'; font-size: 28px; letter-spacing: 3px; color: var(--accent); margin-bottom: 10px; }
+        .header-line { width: 60px; height: 4px; background: var(--accent); border-radius: 2px; }
+        
+        .info-card { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); border-left: 4px solid var(--accent); animation: fadeIn 0.5s ease; }
+        .info-card h3 { font-family: 'Orbitron'; font-size: 11px; margin-bottom: 12px; color: var(--accent); letter-spacing: 1px; }
+        .info-card p { font-size: 14px; line-height: 1.7; color: var(--text-sub); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- PORT MODELS --- */
+        .model-box { display: none; transform: scale(1.6); }
+        .model-box.active { display: block; animation: rotateIn 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+        @keyframes rotateIn { from { transform: scale(1.2) rotateY(90deg); opacity: 0; } to { transform: scale(1.6) rotateY(0deg); opacity: 1; } }
+
+        .intro-diagram { max-width: 85%; border-radius: 15px; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.6); display: none; }
+        .intro-diagram.active { display: block; }
+
+        /* Restored Realistic Styles from Uploads */
+        .vga-restored { display: flex; align-items: center; gap: 10px; }
+        .vga-housing { width: 80px; height: 45px; background: #0055ff; clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; }
+        .vga-screw { width: 12px; height: 12px; background: #7f8c8d; border-radius: 50%; border: 1px solid #333; }
+        
+        .eth-restored { width: 90px; height: 80px; background: #bdc3c7; padding: 5px; border-radius: 4px; position: relative; }
+        .eth-inner { width: 100%; height: 100%; background: #0a0a0a; border: 1px solid #555; position: relative; }
+        .led-g { position: absolute; top: 4px; left: 8px; width: 10px; height: 5px; background: #2ecc71; box-shadow: 0 0 5px #2ecc71; border-radius: 1px; }
+        .led-a { position: absolute; top: 4px; right: 8px; width: 10px; height: 5px; background: #f1c40f; border-radius: 1px; }
+
+        .trs-restored { width: 70px; height: 70px; background: linear-gradient(145deg, #1e1e1e, #111); border-radius: 15px; display: flex; justify-content: center; align-items: center; border: 1px solid #333; }
+        .trs-hole { width: 35px; height: 35px; background: linear-gradient(145deg, #bdc3c7, #2c3e50); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .trs-inner { width: 15px; height: 15px; background: #000; border-radius: 50%; }
+
+        .usb-tongue { width: 100px; height: 25px; background: #050505; border-bottom: 4px solid #00a2ff; display: flex; justify-content: space-around; padding-top: 5px; border-radius: 2px; }
+        .usb-pin { width: 12px; height: 8px; background: #d4af37; }
+    </style>
+</head>
+<body id="app">
+
+    <aside class="sidebar">
+        <a href="home.html" class="back-btn">← BACK TO DASHBOARD</a>
+        
+        <div class="nav-label">OVERVIEW</div>
+        <button class="mode-btn active" onclick="nav('intro')">INTRO TO PORTS</button>
+        <button class="mode-btn" onclick="nav('functions')">PORT FUNCTIONS</button>
+        
+        <div class="nav-label">HARDWARE MODELS</div>
+        <button class="mode-btn" onclick="nav('usb')">USB 3.0 TYPE-A</button>
+        <button class="mode-btn" onclick="nav('hdmi')">HDMI 2.1</button>
+        <button class="mode-btn" onclick="nav('vga')">VGA ANALOG</button>
+        <button class="mode-btn" onclick="nav('eth')">ETHERNET GbE</button>
+        <button class="mode-btn" onclick="nav('trs')">3.5MM AUDIO</button>
+
+        <div style="margin-top: auto;">
+            <button class="mode-btn" style="border: 1px solid var(--border);" onclick="toggleTheme()">🌓 TOGGLE THEME</button>
+        </div>
+    </aside>
+
+    <div class="main-container">
+        <main class="viewport" id="viewport">
+            
+            <img src="https://cdn.vectorstock.com/i/1000v/91/85/computer-ports-verschiedener-typen-steckverbinder-vector-51429185.jpg" class="intro-diagram" id="intro-img">
+
+            <div id="view-usb" class="model-box">
+                <div style="padding: 10px; background: #222; border-radius: 5px; border: 1px solid #444;">
+                    <div class="usb-tongue">
+                        <div class="usb-pin"></div><div class="usb-pin"></div><div class="usb-pin"></div><div class="usb-pin"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-hdmi" class="model-box">
+                <div style="width: 130px; height: 50px; background: #111; border-radius: 4px 4px 18px 18px; border: 1px solid #333; padding-top: 15px;">
+                    <div style="height: 15px; width: 80%; background: #050505; margin: 0 auto; display: flex; justify-content: center; gap: 2px;">
+                        <script>for(let i=0; i<8; i++) document.write('<div style="width:4px;height:3px;background:#d4af37;opacity:0.8"></div>');</script>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-vga" class="model-box">
+                <div class="vga-restored">
+                    <div class="vga-screw"></div>
+                    <div class="vga-housing">
+                        <div style="display:flex; gap:3px;"><script>for(let i=0; i<5; i++) document.write('<div style="width:4px;height:4px;background:#000;border-radius:50%"></div>');</script></div>
+                        <div style="display:flex; gap:3px; margin-left:5px;"><script>for(let i=0; i<5; i++) document.write('<div style="width:4px;height:4px;background:#000;border-radius:50%"></div>');</script></div>
+                        <div style="display:flex; gap:3px;"><script>for(let i=0; i<5; i++) document.write('<div style="width:4px;height:4px;background:#000;border-radius:50%"></div>');</script></div>
+                    </div>
+                    <div class="vga-screw"></div>
+                </div>
+            </div>
+
+            <div id="view-eth" class="model-box">
+                <div class="eth-restored">
+                    <div class="eth-inner">
+                        <div class="led-g"></div><div class="led-a"></div>
+                        <div style="margin-top:25px; display:flex; justify-content:center; gap:2px;">
+                            <script>for(let i=0; i<8; i++) document.write('<div style="width:3px;height:18px;background:#d4af37"></div>');</script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-trs" class="model-box">
+                <div class="trs-restored">
+                    <div class="trs-hole"><div class="trs-inner"></div></div>
+                </div>
+            </div>
+        </main>
+
+        <section class="content-panel" id="panel">
+            <div class="header-area">
+                <h1 id="title">INTRO TO PORTS</h1>
+                <div class="header-line"></div>
+            </div>
+            <div id="cards-container"></div>
+        </section>
+    </div>
+
+    <script>
+        const labData = {
+            intro: {
+                title: "INTRO TO PORTS", color: "#00f2ff", full: false, diagram: true,
+                content: [
+                    { h: "INTERFACE DESIGN", p: "Hardware ports are specialized sockets on the system unit used to link internal circuitry with external peripherals." },
+                    { h: "DATA & SIGNALING", p: "They define the physical connection and the electrical protocol used to communicate between devices." },
+                    { h: "MOTHERBOARD I/O", p: "Most ports are directly soldered to the motherboard's rear I/O panel for maximum stability and speed." }
+                ]
+            },
+            functions: {
+                title: "PORT FUNCTIONS", color: "#ff00ff", full: true, diagram: false,
+                content: [
+                    { h: "DATA EXCHANGE", p: "Allow high-speed bidirectional data flow between the CPU and storage devices like external SSDs or flash drives." },
+                    { h: "PERIPHERAL BRIDGE", p: "Provide the primary connection point for human interface devices (HID) like keyboards, mice, and gaming controllers." },
+                    { h: "A/V TRANSMISSION", p: "Function as the pipeline for digital and analog video signals sent to monitors, TVs, and projectors." },
+                    { h: "POWER DELIVERY", p: "Supply standardized voltage and current to charge devices or power small bus-powered electronics." }
+                ]
+            },
+            usb: { 
+                title: "USB 3.0 TYPE-A", color: "#00a2ff", full: false,
+                content: [
+                    { h: "SPEED ARCHITECTURE", p: "USB 3.0 (Blue) delivers SuperSpeed data rates up to 5Gbps, 10x faster than USB 2.0." },
+                    { h: "UNIVERSAL COMPATIBILITY", p: "The most widely used port globally, supporting thousands of device types via the 'Universal' standard." },
+                    { h: "BUS POWER", p: "Provides 5V power, allowing devices like portable hard drives to run without an external power brick." }
+                ]
+            },
+            hdmi: { 
+                title: "HDMI 2.1", color: "#ffcc00", full: false,
+                content: [
+                    { h: "HD INTEGRATION", p: "Combines uncompressed high-def video and multi-channel audio into a single digital stream." },
+                    { h: "BANDWIDTH", p: "Supports massive bandwidth for 4K and 8K resolutions at high refresh rates for gaming and cinema." },
+                    { h: "CEC CONTROL", p: "Includes Consumer Electronics Control, allowing one remote to control multiple connected HDMI devices." }
+                ]
+            },
+            vga: { 
+                title: "VGA ANALOG", color: "#3366ff", full: false,
+                content: [
+                    { h: "RGB SIGNALING", p: "An analog interface that carries Red, Green, and Blue color data separately for display accuracy." },
+                    { h: "15-PIN D-SUB", p: "Uses a specific trapezoidal shape with 3 rows of 5 pins to prevent incorrect insertion." },
+                    { h: "PROJECTOR STANDARD", p: "Remains a critical standard for connecting older projectors and industrial display equipment." }
+                ]
+            },
+            eth: { 
+                title: "ETHERNET GbE", color: "#2ecc71", full: false,
+                content: [
+                    { h: "WIRED RELIABILITY", p: "Provides a dedicated, physical network path that is immune to the interference often found in Wi-Fi." },
+                    { h: "STATUS LEDS", p: "Features built-in Link and Activity lights to indicate successful network handshakes and data flow." },
+                    { h: "GbE PERFORMANCE", p: "Gigabit Ethernet supports 1000 Mbps speeds, essential for large file transfers and local servers." }
+                ]
+            },
+            trs: { 
+                title: "3.5MM AUDIO", color: "#ff9900", full: false,
+                content: [
+                    { h: "ANALOG OUTPUT", p: "Converts digital sound from the motherboard into analog waves for headphones and speakers." },
+                    { h: "TRS ARCHITECTURE", p: "Stands for Tip-Ring-Sleeve, allowing for Left, Right, and Ground signals in one jack." },
+                    { h: "DURABILITY", p: "Designed for thousands of insertions and removals, making it the most durable audio connection." }
+                ]
+            }
+        };
+
+        function nav(key) {
+            const data = labData[key];
+            const viewport = document.getElementById('viewport');
+            const panel = document.getElementById('panel');
+            const container = document.getElementById('cards-container');
+
+            document.documentElement.style.setProperty('--accent', data.color);
+
+            if (data.full) {
+                viewport.classList.add('hidden');
+                panel.classList.add('full-view');
+            } else {
+                viewport.classList.remove('hidden');
+                panel.classList.remove('full-view');
+            }
+
+            document.getElementById('intro-img').classList.toggle('active', !!data.diagram);
+            document.querySelectorAll('.model-box').forEach(m => m.classList.remove('active'));
+            const model = document.getElementById(`view-${key}`);
+            if (model) model.classList.add('active');
+
+            document.getElementById('title').innerText = data.title;
+            container.innerHTML = '';
+            data.content.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'info-card';
+                card.innerHTML = `<h3>${item.h}</h3><p>${item.p}</p>`;
+                container.appendChild(card);
+            });
+
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(data.title.split(' ')[0]));
+            });
+        }
+
+        function toggleTheme() {
+            const body = document.getElementById('app');
+            body.setAttribute('data-theme', body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        }
+
+        nav('intro');
+    </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot - Output Device Expert</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            height: 100vh;
+            background: radial-gradient(circle at center, #0f2027, #000000 70%);
+            overflow: hidden;
+            font-family: 'Orbitron', sans-serif;
+            color: #00ffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ANIMATED BACKGROUND */
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: white;
+            animation: twinkle 2s infinite alternate;
+            z-index: -2;
+        }
+        @keyframes twinkle { from { opacity: 0.2; } to { opacity: 1; } }
+
+        .brain {
+            position: absolute;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 60px rgba(0, 255, 255, 0.05);
+            animation: rotate 30s linear infinite;
+            z-index: -1;
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* CHAT UI */
+        .container {
+            backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 750px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.2);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .messages::-webkit-scrollbar { width: 4px; }
+        .messages::-webkit-scrollbar-thumb { background: cyan; border-radius: 10px; }
+
+        .message {
+            padding: 12px 18px;
+            border-radius: 15px;
+            max-width: 85%;
+            font-size: 13px;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        .message.user {
+            background: cyan; color: black;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+        .message.ai {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid cyan; color: cyan;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .input-area { display: flex; gap: 10px; }
+        input {
+            padding: 15px 20px;
+            border-radius: 30px;
+            border: 1px solid cyan;
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            color: #00ffff;
+            font-family: 'Orbitron';
+            outline: none;
+        }
+        button {
+            font-family: 'Orbitron';
+            cursor: pointer;
+            transition: 0.3s;
+            background: transparent;
+            border: 1px solid cyan;
+            color: cyan;
+            text-transform: uppercase;
+        }
+        button.send { padding: 0 30px; border-radius: 30px; }
+        button:hover { background: cyan; color: black; box-shadow: 0 0 20px cyan; }
+
+        .backHome { margin-top: 15px; padding: 10px; border-radius: 10px; font-size: 11px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fadeOut { opacity: 0; transform: scale(0.9); pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="brain"></div>
+    <div class="container" id="chatContainer">
+        <div class="messages" id="messages">
+            <div class="message ai">Internal Database Loaded. I have full technical specs on Monitors, Printers (2D/3D), Audio, Plotters, and specialized Output Hardware. How can I help?</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ask about 'Laser Printing process' or 'OLED vs LCD'..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="send" onclick="sendMessage()">SEND</button>
+        </div>
+        <button class="backHome" onclick="goHome()">BACK TO HOME</button>
+    </div>
+
+    <script>
+        // Star Background
+        for(let i=0; i<100; i++) {
+            let star = document.createElement("div");
+            star.className = "star";
+            star.style.top = Math.random() * 100 + "%";
+            star.style.left = Math.random() * 100 + "%";
+            document.body.appendChild(star);
+        }
+
+        // --- ENHANCED HARDCODED DATABASE ---
+        const DATABASE = {
+            monitor: {
+                keywords: ["monitor", "display", "screen", "lcd", "led", "oled", "crt", "refresh"],
+                response: "MONITORS: \n• CRT (Cathode Ray Tube): Uses electron guns to strike phosphor. \n• LCD (Liquid Crystal Display): Uses a liquid solution between glass. \n• LED: An LCD that uses light-emitting diodes for backlight. \n• OLED: Individual pixels light up (Infinite contrast). \n• Refresh Rate: Measured in Hertz (Hz), it determines image smoothness."
+            },
+            laser: {
+                keywords: ["laser", "toner", "drum"],
+                response: "LASER PRINTER PROCESS: \n1. Charging: Drum gets a static charge. \n2. Exposing: Laser draws the image on the drum. \n3. Developing: Toner sticks to the laser-drawn areas. \n4. Transferring: Toner moves to paper. \n5. Fusing: Heat rollers melt toner onto the page permanently."
+            },
+            inkjet: {
+                keywords: ["inkjet", "droplet", "nozzle", "piezo"],
+                response: "INKJET PRINTERS: Uses tiny nozzles to spray droplets of liquid ink. Two main types: \n• Thermal: Heat creates a bubble that pushes ink out. \n• Piezoelectric: Electricity vibrates a crystal to mechanicaly pump the ink. Best for high-quality photo output."
+            },
+            plotter: {
+                keywords: ["plotter", "architect", "vector", "blueprint"],
+                response: "PLOTTERS: Unlike standard printers that use dots, plotters use continuous lines. They are vector-based and often use actual pens to draw on massive sheets of paper. Perfect for architectural blueprints and engineering maps."
+            },
+            printing3d: {
+                keywords: ["3d", "additive", "filament", "pla", "resin"],
+                response: "3D PRINTING (Additive Manufacturing): \n• FDM: Melts plastic filament (PLA/ABS) layer by layer. \n• SLA (Resin): Uses UV lasers to harden liquid chemicals. \n• SLS: Uses high-power lasers to fuse metal or plastic powder."
+            },
+            audio: {
+                keywords: ["audio", "speaker", "sound", "headphone", "dac"],
+                response: "AUDIO OUTPUT: Converts digital data into analog sound waves. \n• Speakers: Use magnets and coils to vibrate a diaphragm. \n• DAC: Digital-to-Analog Converter, essential for clear sound. \n• Surround Sound: Uses multiple channels (e.g., 5.1 or 7.1) for spatial positioning."
+            },
+            projector: {
+                keywords: ["projector", "dlp", "lumens"],
+                response: "PROJECTORS: \n• LCD: Shines light through 3 small glass panels. \n• DLP: Uses millions of microscopic mirrors on a chip. \n• Lumens: The measure of light output; higher lumens are better for bright rooms."
+            },
+            accessibility: {
+                keywords: ["braille", "embosser", "tactile"],
+                response: "ACCESSIBILITY OUTPUT: \n• Braille Embossers: Print raised dots on heavy paper. \n• Refreshable Braille Display: Uses pins that move up/down in real-time to allow the blind to 'read' a computer screen via touch."
+            }
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("userInput");
+            const msg = input.value.trim();
+            if (msg === "") return;
+
+            addMessage(msg, "user");
+            input.value = "";
+
+            // Simulate "Analyzing"
+            const messagesDiv = document.getElementById("messages");
+            const typingDiv = document.createElement("div");
+            typingDiv.classList.add("message", "ai");
+            typingDiv.id = "temp-typing";
+            typingDiv.innerText = "Scanning Internal Records...";
+            messagesDiv.appendChild(typingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            setTimeout(() => {
+                document.getElementById("temp-typing").remove();
+                addMessage(getAIResponse(msg), "ai");
+            }, 600);
+        }
+
+        function addMessage(text, type) {
+            const messagesDiv = document.getElementById("messages");
+            const div = document.createElement("div");
+            div.classList.add("message", type);
+            div.style.whiteSpace = "pre-line"; // Preserves line breaks
+            div.innerText = text;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function getAIResponse(msg) {
+            msg = msg.toLowerCase();
+            if (msg.includes("hello") || msg.includes("hi")) return "System Online. Ask about hardware specs.";
+            
+            for (let cat in DATABASE) {
+                if (DATABASE[cat].keywords.some(k => msg.includes(k))) {
+                    return DATABASE[cat].response;
+                }
+            }
+            return "Query unrecognized. I have data on: CRT/LCD/OLED, Laser/Inkjet/3D/Plotter, Audio DACs, and Projectors.";
+        }
+
+        function goHome() {
+            document.getElementById("chatContainer").classList.add("fadeOut");
+            setTimeout(() => { window.location.href = "home.html"; }, 800);
+        }
+    </script>
+</body>
+</html>

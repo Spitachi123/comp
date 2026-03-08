@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printer.OS | Complete Schematic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050608;
+            --sidebar: #0d0e12;
+            --panel: rgba(10, 11, 14, 0.98);
+            --accent: #00f2ff; 
+            --text: #ffffff;
+            --text-dim: #8899a6;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="bw"] {
+            --bg: #ffffff;
+            --sidebar: #f2f2f2;
+            --panel: #ffffff;
+            --accent: #000000;
+            --text: #000000;
+            --text-dim: #444444;
+            --border: #cccccc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; transition: 0.4s; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 340px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 30px; display: flex; flex-direction: column; z-index: 10; }
+        .back-btn { text-decoration: none; color: var(--accent); font-family: 'Orbitron'; font-size: 11px; margin-bottom: 35px; display: block; border: 1px solid var(--accent); padding: 12px; text-align: center; border-radius: 4px; transition: 0.3s; }
+        
+        .nav-label { font-family: 'Orbitron'; font-size: 9px; color: var(--text-dim); letter-spacing: 2px; margin: 15px 0 8px; display: block; }
+        .nav-btn { width: 100%; padding: 12px; background: transparent; border: none; color: var(--text-dim); text-align: left; font-family: 'Orbitron'; font-size: 10px; cursor: pointer; transition: 0.2s; border-left: 3px solid transparent; }
+        .nav-btn.active { color: var(--text); border-left-color: var(--accent); background: rgba(0, 242, 255, 0.05); }
+
+        /* --- NEW: LINK INPUT SECTION --- */
+        .config-box { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+        .link-input { width: 100%; background: #000; border: 1px solid var(--border); color: var(--accent); padding: 8px; font-family: monospace; font-size: 10px; margin-bottom: 10px; border-radius: 4px; outline: none; }
+        .link-input:focus { border-color: var(--accent); }
+
+        /* --- VIEWPORT (Image Box) --- */
+        .viewport { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(0,242,255,0.05) 0%, transparent 70%); position: relative; }
+        
+        .image-container {
+            width: 80%;
+            height: 60%;
+            max-width: 600px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+        }
+
+        .printer-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            transition: 0.5s ease;
+            filter: drop-shadow(0 0 20px rgba(0,242,255,0.2));
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            opacity: 0.3;
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+        /* --- DATA PANEL --- */
+        .data-panel { width: 500px; background: var(--panel); border-left: 1px solid var(--border); padding: 50px; overflow-y: auto; }
+        .category-pill { display: inline-block; padding: 4px 10px; background: var(--accent); color: #000; font-family: 'Orbitron'; font-size: 9px; font-weight: 900; border-radius: 3px; margin-bottom: 15px; }
+        #tech-title { font-family: 'Orbitron'; font-size: 26px; margin-bottom: 20px; color: var(--text); }
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
+        .tab-btn { flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'Orbitron'; font-size: 9px; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { border-color: var(--accent); color: var(--accent); }
+        .content-block h4 { font-family: 'Orbitron'; font-size: 10px; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; }
+        .content-block p { font-size: 14px; line-height: 1.7; color: var(--text-dim); margin-bottom: 20px; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <aside class="sidebar">
+        <a href="printer.html" class="back-btn">← SYSTEM_ROOT</a>
+        
+        <span class="nav-label">IMPACT CATEGORY</span>
+        <button class="nav-btn active" onclick="showTech('impact')">DOT MATRIX</button>
+
+        <span class="nav-label">NON-IMPACT CATEGORY</span>
+        <button class="nav-btn" onclick="showTech('inkjet')">INKJET</button>
+        <button class="nav-btn" onclick="showTech('laser')">LASER</button>
+        <button class="nav-btn" onclick="showTech('3d')">3D PRINTER</button>
+
+        <div class="config-box">
+            <span class="nav-label">IMAGE OVERRIDE (URL)</span>
+            <input type="text" id="url-input" class="link-input" placeholder="Paste image link here..." oninput="updateImage(this.value)">
+            <button class="nav-btn" style="border: 1px solid var(--accent); color: var(--accent);" onclick="toggleTheme()">🌓 TOGGLE B&W MODE</button>
+        </div>
+    </aside>
+
+    <main class="viewport">
+        <div class="image-container">
+            <div class="scan-line"></div>
+            <img id="display-img" class="printer-img" src="" alt="Select a printer">
+        </div>
+    </main>
+
+    <aside class="data-panel">
+        <div class="intro-section">
+            <div class="category-pill" id="cat-pill">CATEGORY</div>
+            <p class="intro-text" id="cat-intro" style="color: var(--text-dim); font-size: 13px; line-height: 1.6; margin-bottom: 20px;">Select a technology to view details.</p>
+        </div>
+
+        <h2 id="tech-title">Printer Name</h2>
+        
+        <div class="tabs">
+            <button class="tab-btn active" id="t-work" onclick="setTab('work')">HOW IT WORKS</button>
+            <button class="tab-btn" id="t-eval" onclick="setTab('eval')">PROS / CONS</button>
+        </div>
+
+        <div id="info-display" class="content-block"></div>
+    </aside>
+
+    <script>
+        let currentKey = 'impact';
+        let currentTab = 'work';
+
+        // Add your default image links here
+        const data = {
+            impact: {
+                title: "Dot Matrix Printer",
+                cat: "IMPACT PRINTERS",
+                intro: "A legacy technology that remains vital for industrial environments and multi-part carbon forms.",
+                work: "A mechanical print head strikes an ink ribbon against paper. It uses pins to create characters out of dots.",
+                pros: "Low cost, durable, handles carbon copies.",
+                cons: "Noisy, low resolution, slow.",
+                img: "dot.png"
+            },
+            inkjet: {
+                title: "Inkjet Printer",
+                cat: "NON-IMPACT PRINTERS",
+                intro: "The standard for home photo printing and high-resolution color graphics.",
+                work: "Micro-nozzles spray liquid ink droplets. It uses thermal or piezoelectric technology to pulse the ink.",
+                pros: "Vibrant colors, compact, inexpensive hardware.",
+                cons: "Expensive ink, slow for high volumes.",
+                img: "ink.png"
+            },
+            laser: {
+                title: "Laser Printer",
+                cat: "NON-IMPACT PRINTERS",
+                intro: "The powerhouse of modern offices, known for speed and razor-sharp text.",
+                work: "A laser beam creates a static image on a drum. Toner powder sticks to the charge and is fused via heat.",
+                pros: "Extremely fast, low cost per page, crisp text.",
+                cons: "Higher initial cost, bulky size.",
+                img: "laser.png"
+            },
+            '3d': {
+                title: "3D Printer (FDM)",
+                cat: "ADDITIVE MANUFACTURING",
+                intro: "A revolutionary process for creating 3D objects from digital CAD files.",
+                work: "Thermoplastic filament is melted and extruded layer-by-layer to build a physical object.",
+                pros: "Rapid prototyping, complex geometries.",
+                cons: "Slow, requires technical setup.",
+                img: "3d.png"
+            }
+        };
+
+        function showTech(key) {
+            currentKey = key;
+            const d = data[key];
+            
+            document.getElementById('tech-title').innerText = d.title;
+            document.getElementById('cat-pill').innerText = d.cat;
+            document.getElementById('cat-intro').innerText = d.intro;
+            document.getElementById('display-img').src = d.img;
+            document.getElementById('url-input').value = d.img; // Show the link in the input
+            
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.toggle('active', b.innerText.includes(d.title.toUpperCase()) || (key === '3d' && b.innerText.includes('3D')));
+            });
+
+            render();
+        }
+
+        function updateImage(val) {
+            if(val) {
+                document.getElementById('display-img').src = val;
+                data[currentKey].img = val; // Save the link for this session
+            }
+        }
+
+        function setTab(t) {
+            currentTab = t;
+            document.getElementById('t-work').classList.toggle('active', t === 'work');
+            document.getElementById('t-eval').classList.toggle('active', t === 'eval');
+            render();
+        }
+
+        function render() {
+            const d = data[currentKey];
+            const box = document.getElementById('info-display');
+            if(currentTab === 'work') {
+                box.innerHTML = `<h4>Detailed Mechanism</h4><p>${d.work}</p>`;
+            } else {
+                box.innerHTML = `<h4>Advantages</h4><p>${d.pros}</p><h4>Disadvantages</h4><p>${d.cons}</p>`;
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            body.setAttribute('data-theme', body.getAttribute('data-theme') === 'bw' ? 'dark' : 'bw');
+        }
+
+        showTech('impact');
+    </script>
+</body>
+</html>

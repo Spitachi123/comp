@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Output Devices Interface</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    background:radial-gradient(circle at center,#0f2027,#000000 70%);
+    overflow:hidden;
+    font-family:'Orbitron',sans-serif;
+    color:#00ffff;
+}
+
+/* STAR PARTICLES */
+.star{
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:white;
+    animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+    from{opacity:0.2;}
+    to{opacity:1;}
+}
+
+/* AI BRAIN CORE */
+.brain{
+    position:absolute;
+    width:250px;
+    height:250px;
+    border-radius:50%;
+    border:2px solid #00ffff;
+    box-shadow:0 0 40px #00ffff;
+    animation:rotate 15s linear infinite;
+    top: 10%; /* Adjusted to stay behind content */
+    left: calc(50% - 125px);
+    z-index: -1;
+}
+
+@keyframes rotate{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+/* GLASS UI */
+.container{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    backdrop-filter:blur(10px);
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.2);
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 0 30px rgba(0,255,255,0.3);
+    animation:fadeIn 2s ease;
+    width: 90%;
+    max-width: 800px;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translate(-50%,-40%);}
+    to{opacity:1; transform:translate(-50%,-50%);}
+}
+
+h1{
+    font-size:42px;
+    text-shadow:0 0 15px cyan;
+    margin-bottom: 10px;
+}
+
+.subtitle{
+    margin-bottom: 30px;
+    font-size: 14px;
+    min-height: 25px;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+/* --- BUTTON POSITION MANAGEMENT --- */
+
+.device-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for devices */
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.nav-section {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+button {
+    padding: 15px;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid cyan;
+    color: cyan;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+button:hover {
+    background: cyan;
+    color: black;
+    box-shadow: 0 0 20px cyan;
+    transform: translateY(-3px);
+}
+
+/* Styling for the nav buttons to look slightly different */
+.nav-section button {
+    border-color: rgba(0, 255, 255, 0.5);
+    font-size: 10px;
+    padding: 10px 20px;
+}
+
+.fadeOut{
+    animation:zoomOut 1.5s forwards;
+}
+
+@keyframes zoomOut{
+    to{opacity:0; transform:translate(-50%,-50%) scale(1.5);}
+}
+
+</style>
+</head>
+<body>
+
+<div class="brain"></div>
+
+<script>
+for(let i=0;i<150;i++){
+    let star=document.createElement("div");
+    star.className="star";
+    star.style.top=Math.random()*100+"%";
+    star.style.left=Math.random()*100+"%";
+    star.style.animationDuration=(1+Math.random()*3)+"s";
+    document.body.appendChild(star);
+}
+</script>
+
+<div class="container" id="main">
+    <h1>OUTPUT DEVICES</h1>
+    <div class="subtitle" id="typing"></div>
+
+    <div class="device-section">
+        <button onclick="intro()">Introduction</button>
+        <button onclick="Monitor()">Monitor</button>
+        <button onclick="Printer()">Printer</button>
+        <button onclick="Speaker()">Speaker</button>
+        <button onclick="Ports()">Ports</button>
+    </div>
+
+    <div class="nav-section">
+        <button onclick="launch()">Members</button>
+        <button onclick="launch1()">Table of Content</button>
+        <button onclick="launch2()">Ai chatbot</button>
+    </div>
+</div>
+
+<audio id="sound">
+<source src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_124bfa7c14.mp3">
+</audio>
+
+<script>
+// I kept all your JS logic exactly as requested
+const text="Transforming Binary Signals Into Human-Perceivable Information...";
+let i=0;
+
+function typing(){
+    if(i<text.length){
+        document.getElementById("typing").innerHTML+=text.charAt(i);
+        i++;
+        setTimeout(typing,40);
+    }
+}
+typing();
+
+// Logic for redirection
+function launch(){
+    document.getElementById("sound").play();
+    document.getElementById("main").classList.add("fadeOut");
+    setTimeout(()=>{
+        window.location.href="member.html";
+    },1500);
+}
+function launch1(){
+    document.getElementById("sound").play();
+    document.getElementById("main").classList.add("fadeOut");
+    setTimeout(()=>{
+        window.location.href="table of content.html";
+    },1500);
+}
+function launch2(){
+    document.getElementById("sound").play();
+    document.getElementById("main").classList.add("fadeOut");
+    setTimeout(()=>{
+        window.location.href="chatbot.html";
+    },1500);
+}
+
+// Dummy functions for the device buttons (You can point these to your other HTML files)
+function intro(){ console.log("Intro clicked"); 
+  setTimeout(()=>{
+        window.location.href="intro.html";
+    },1500);
+ }
+function Monitor(){ console.log("Monitor clicked");
+    setTimeout(()=>{
+        window.location.href="monitor.html";
+    },1500);
+ }
+function Printer(){ console.log("Printer clicked"); 
+  setTimeout(()=>{
+        window.location.href="printer.html";
+    },1500);
+ }
+function Speaker(){ console.log("Speaker clicked");
+      setTimeout(()=>{
+        window.location.href="speaker.html";
+    },1500);
+ }
+ 
+function Ports(){ console.log("Ports clicked"); 
+      setTimeout(()=>{
+        window.location.href="ports.html";
+    },1500);
+ 
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Evolution | Mechanical Schematic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030305;
+            --accent: #00f2ff; 
+            --panel: rgba(10, 10, 15, 0.98);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- SIDE NAVIGATION --- */
+        .nav-sidebar {
+            width: 250px;
+            background: #08080a;
+            border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px;
+            z-index: 100;
+        }
+
+        .nav-sidebar h1 {
+            font-family: 'Orbitron';
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            color: #555;
+        }
+
+        .nav-btn {
+            background: transparent; border: 1px solid transparent; color: #666;
+            padding: 15px; text-align: left; font-family: 'Orbitron';
+            font-size: 11px; cursor: pointer; transition: 0.3s;
+            margin-bottom: 10px; border-radius: 4px;
+        }
+
+        .nav-btn.active { color: #fff; border-color: var(--accent); background: rgba(255,255,255,0.05); box-shadow: -5px 0 0 var(--accent); }
+
+        /* --- CENTER: 3D VIEWPORT --- */
+        .viewport {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            align-items: center; justify-content: center;
+            perspective: 2000px;
+            background: radial-gradient(circle at center, #151520 0%, #000 100%);
+        }
+
+        .stack-machine {
+            position: relative;
+            width: 380px; height: 250px;
+            transform-style: preserve-3d;
+            transform: rotateX(65deg) rotateZ(-30deg);
+            transition: transform 0.5s ease-out;
+        }
+
+        .layer {
+            position: absolute; width: 100%; height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .layer.active { border-color: var(--accent); box-shadow: 0 0 40px rgba(0, 242, 255, 0.3); background: rgba(0, 242, 255, 0.05); }
+
+        .l-chassis { background: #0a0a0c; border: 4px solid #1a1a1c; }
+        .l-front { background: #000; border: 8px solid #1a1a1a; overflow: hidden; }
+        .l-rgb { background-image: linear-gradient(90deg, rgba(255,0,0,0.1) 0% 33%, rgba(0,255,0,0.1) 33% 66%, rgba(0,0,255,0.1) 66% 100%); background-size: 15px 100%; }
+
+        /* --- RIGHT: SCROLLABLE DATA PANEL --- */
+        .data-panel {
+            width: 450px;
+            background: var(--panel);
+            border-left: 1px solid #222;
+            padding: 0 40px;
+            overflow-y: scroll;
+            scroll-behavior: smooth;
+        }
+
+        .tech-header { position: sticky; top: 0; background: var(--panel); padding: 40px 0 20px 0; z-index: 10; }
+        #tech-title { font-family: 'Orbitron'; font-size: 22px; color: var(--accent); text-transform: uppercase; }
+
+        .part-card {
+            background: rgba(255,255,255,0.02);
+            border-left: 2px solid #333;
+            padding: 30px;
+            margin-bottom: 60vh; 
+            transition: 0.5s;
+            opacity: 0.3;
+        }
+
+        .part-card.active { opacity: 1; border-left-color: var(--accent); background: rgba(255,255,255,0.05); }
+        .part-card h3 { font-family: 'Orbitron'; font-size: 13px; margin-bottom: 10px; color: var(--accent); }
+        .part-card p { font-size: 14px; color: #aaa; line-height: 1.6; }
+
+        /* ANALYSIS BUTTONS */
+        .analysis-section { padding-bottom: 100px; }
+        .toggle-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .toggle-btn {
+            flex: 1; padding: 12px; font-family: 'Orbitron'; font-size: 10px;
+            background: #111; border: 1px solid #333; color: #666; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-btn.active.pro { background: rgba(0, 255, 136, 0.1); color: #00ff88; border-color: #00ff88; }
+        .toggle-btn.active.con { background: rgba(255, 68, 68, 0.1); color: #ff4444; border-color: #ff4444; }
+        
+        .analysis-text { 
+            padding: 20px; background: rgba(255,255,255,0.03); border-radius: 4px; 
+            font-size: 14px; color: #ccc; line-height: 1.6; display: none;
+        }
+        .analysis-text.visible { display: block; }
+
+    </style>
+</head>
+<body id="app">
+
+    <nav class="nav-sidebar">
+        <h1>DISPLAY.OS</h1>
+        <button class="nav-btn active" id="btn-led" onclick="changeMode('led')">LED 4K</button>
+        <button class="nav-btn" id="btn-lcd" onclick="changeMode('lcd')">LCD 1080P</button>
+        <button class="nav-btn" id="btn-crt" onclick="changeMode('crt')">CRT ANALOG</button>
+    </nav>
+
+    <main class="viewport">
+        <div class="stack-machine" id="mainStack">
+            <div class="layer l-chassis" id="l0" data-z="0"></div>
+            <div class="layer" id="l1" data-z="100"></div>
+            <div class="layer" id="l2" data-z="200"></div>
+            <div class="layer" id="l3" data-z="300"></div>
+            <div class="layer l-rgb" id="l4" data-z="400"></div>
+            <div class="layer l-front" id="l5" data-z="500">
+                <div style="text-align: center;">
+                    <h2 id="screen-label" style="font-family:'Orbitron'; font-size:18px;">ACTIVE</h2>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <aside class="data-panel" id="scrollPanel">
+        <div class="tech-header">
+            <h2 id="tech-title">LED ULTRA HD 4K</h2>
+        </div>
+
+        <div id="cards-container">
+            </div>
+
+        <div class="analysis-section">
+            <h3 style="font-family:'Orbitron'; font-size:12px; margin-bottom:15px; color:#555;">FINAL ANALYSIS</h3>
+            <div class="toggle-container">
+                <button class="toggle-btn pro" id="proBtn" onclick="toggleAnalysis('pro')">ADVANTAGES</button>
+                <button class="toggle-btn con" id="conBtn" onclick="toggleAnalysis('con')">DISADVANTAGES</button>
+            </div>
+            <div id="proText" class="analysis-text"></div>
+            <div id="conText" class="analysis-text"></div>
+        </div>
+        
+        <div style="height: 20vh;"></div>
+    </aside>
+
+    <div class="back-nav" style="position: fixed; top: 30px; left: 30px; z-index: 1000;">
+        <button onclick="goHome()" class="nav-btn" style="border-radius: 50px; padding: 10px 25px; border: 1px solid #333; background: #0a0a0c;">
+            <span style="color: var(--accent); margin-right: 8px;">←</span> BACK TO HUB
+        </button>
+    </div>
+
+<script>
+    function goHome() {
+        document.body.style.transition = 'opacity 0.5s ease';
+        document.body.style.opacity = '0';
+        setTimeout(() => { window.location.href = "home.html"; }, 500);
+    }
+    
+    const techData = {
+        led: {
+            title: "LED ULTRA HD 4K",
+            intro: "LED monitors are the modern standard. They use tiny light-bulbs (LEDs) to shine light through a liquid crystal panel. They are loved for being super thin, very bright, and displaying vibrant colors while using very little electricity.",
+            color: "#00f2ff",
+            cards: [
+                ["01. LED MATRIX", "LED monitors use a grid of tiny Light Emitting Diodes. This allows for 'local dimming,' where parts of the screen turn off for true black levels."],
+                ["02. PRISMATIC DIFFUSER", "Direct LED light is too sharp. This layer uses microscopic prisms to spread light evenly across the panel for uniform brightness."],
+                ["03. LIQUID CRYSTAL GATE", "The crystals twist when electrified, acting like high-speed shutters that block or allow light to pass through."],
+                ["04. SUB-PIXEL ARRAY", "By filtering light into Red, Green, and Blue at different intensities, millions of colors are generated."],
+                ["05. POLARIZING FILM", "This final chemical layer aligns the light waves. Without it, you would only see a blinding white glare."]
+            ],
+            pros: "Energy efficient, extremely thin, high brightness, and long lifespan, low power consumption, larger viewing angle ",
+            cons: "Expensive monitor, difficult to maintain."
+        },
+        lcd: {
+            title: "LCD DIGITAL 1080P",
+            intro: "LCD (Liquid Crystal Display) was the first major step away from big, heavy TVs. Instead of tiny bulbs, it uses long fluorescent tubes as a backlight. It is a reliable, affordable technology that paved the way for flat-screen gaming and office work.",
+            color: "#add8e6",
+            cards: [
+                ["01. CCFL TUBES", "Cold Cathode Fluorescent Lamps provide a steady, tube-based backlight."],
+                ["02. LIGHT GUIDE", "A thick acrylic plate that bounces tube-light forward toward the user."],
+                ["03. LCD LAYER", "Liquid crystals that turn 'on' or 'off' to create the grayscale image."],
+                ["04. COLOR STRIPES", "Vertical RGB stripes that add color to the light passing through."],
+                ["05. POLARIZER", "Essential film that makes the 'hidden' image visible to the human eye."]
+            ],
+            pros: "Very affordable, flicker-free, and no risk of permanent image burn-in. Required lower power compared to CRT, better for human eyes due to its low brightness and low radiation.",
+            cons: "Limited viewing angle compared to other monitors, expensive than CRT, and weaker contrast/black levels."
+        },
+        crt: {
+            title: "CRT ANALOG 480I",
+            intro: "CRT (Cathode Ray Tube) is the 'old school' tech found in heavy, boxy monitors. It works by firing a beam of electrons at a glass screen coated in chemicals that glow. While bulky, gamers still love them today because they have zero lag and very smooth motion.",
+            color: "#22ff22",
+            cards: [
+                ["01. ELECTRON GUN", "Fires a concentrated beam of electrons from the back of the tube."],
+                ["02. MAGNETIC YOKE", "Uses magnetism to 'aim' the beam across the screen thousands of times per second."],
+                ["03. VACUUM SPACE", "The tube is a vacuum so electrons can fly without hitting air molecules."],
+                ["04. PHOSPHOR DOTS", "Chemicals that glow Red, Green, or Blue when struck by electrons."],
+                ["05. HEAVY GLASS", "Thick, leaded glass to contain the vacuum and block X-ray radiation."]
+            ],
+            pros: "Better brightness, comparatively cheaper than other monitors, larger viewing angle almost 180 degrees.",
+            cons: "Extremely heavy and bulky, high power consumption, and emits low-level radiation."
+        }
+    };
+
+    let currentType = 'led';
+
+    function changeMode(type) {
+        currentType = type;
+        const data = techData[type];
+        document.documentElement.style.setProperty('--accent', data.color);
+        document.getElementById('tech-title').innerText = data.title;
+        document.getElementById('screen-label').innerText = type.toUpperCase();
+        document.getElementById('screen-label').style.color = data.color;
+
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-' + type).classList.add('active');
+
+        const container = document.getElementById('cards-container');
+        container.innerHTML = `
+            <div class="part-card active" style="margin-bottom: 40px; border-left: 2px solid var(--accent); opacity: 1;">
+                <h3 style="letter-spacing: 2px; color: #fff;">SYSTEM OVERVIEW</h3>
+                <p style="color: var(--accent); font-style: italic; font-size: 13px;">${data.intro}</p>
+            </div>
+        `;
+        
+        data.cards.forEach((card, i) => {
+            const div = document.createElement('div');
+            div.className = 'part-card';
+            div.id = `card-${i+1}`;
+            div.setAttribute('data-layer', `l${i+1}`);
+            div.innerHTML = `<h3>${card[0]}</h3><p>${card[1]}</p>`;
+            container.appendChild(div);
+        });
+
+        document.getElementById('proText').innerText = data.pros;
+        document.getElementById('conText').innerText = data.cons;
+        toggleAnalysis(null); 
+        document.getElementById('scrollPanel').scrollTop = 0;
+    }
+
+    document.getElementById('scrollPanel').addEventListener('scroll', function(e) {
+        const panel = e.target;
+        const progress = panel.scrollTop / (panel.scrollHeight - panel.clientHeight);
+        document.getElementById('mainStack').style.transform = `rotateX(${65 - (progress * 15)}deg) rotateZ(${-30 + (progress * 20)}deg)`;
+
+        document.querySelectorAll('.layer').forEach(layer => {
+            const zBase = layer.getAttribute('data-z');
+            const currentZ = zBase * progress * 1.5;
+            layer.style.transform = `translateZ(${currentZ}px)`;
+        });
+
+        document.querySelectorAll('.part-card').forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const layerId = card.getAttribute('data-layer');
+            if (rect.top < window.innerHeight/2 && rect.bottom > window.innerHeight/2) {
+                card.classList.add('active');
+                if(layerId) document.getElementById(layerId).classList.add('active');
+            } else {
+                card.classList.remove('active');
+                if(layerId) document.getElementById(layerId).classList.remove('active');
+            }
+        });
+    });
+
+    function toggleAnalysis(mode) {
+        const pBtn = document.getElementById('proBtn');
+        const cBtn = document.getElementById('conBtn');
+        const pTxt = document.getElementById('proText');
+        const cTxt = document.getElementById('conText');
+
+        if (mode === 'pro') {
+            pBtn.classList.add('active'); cBtn.classList.remove('active');
+            pTxt.classList.add('visible'); cTxt.classList.remove('visible');
+        } else if (mode === 'con') {
+            cBtn.classList.add('active'); pBtn.classList.remove('active');
+            cTxt.classList.add('visible'); pTxt.classList.remove('visible');
+        } else {
+            pBtn.classList.remove('active'); cBtn.classList.remove('active');
+            pTxt.classList.remove('visible'); cTxt.classList.remove('visible');
+        }
+    }
+
+    changeMode('led');
+</script>
+</body>
+</html>
