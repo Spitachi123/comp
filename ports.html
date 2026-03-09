@@ -93,7 +93,7 @@
         <button class="mode-btn" onclick="nav('functions')">PORT FUNCTIONS</button>
         
         <div class="nav-label">HARDWARE MODELS</div>
-        <button class="mode-btn" onclick="nav('usb')">USB 3.0 TYPE-A</button>
+        <button class="mode-btn" onclick="nav('usb')">USB</button>
         <button class="mode-btn" onclick="nav('hdmi')">HDMI 2.1</button>
         <button class="mode-btn" onclick="nav('vga')">VGA ANALOG</button>
         <button class="mode-btn" onclick="nav('eth')">ETHERNET GbE</button>
@@ -184,9 +184,10 @@
                 ]
             },
             usb: { 
-                title: "USB 3.0 TYPE-A", color: "#00a2ff", full: false,
+                title: "USB", color: "#00a2ff", full: false,
                 content: [
-                    { h: "SPEED ARCHITECTURE", p: "USB 3.0 (Blue) delivers SuperSpeed data rates up to 5Gbps, 10x faster than USB 2.0." },
+                    { h: "SPEED ARCHITECTURE", p: "USB delivers SuperSpeed data rates up to 5Gbps." },
+                    { h: "Plug-AND-Play FUNCTIONALITY", p:"Allows devices to be connected or removed without restarting the system."},
                     { h: "UNIVERSAL COMPATIBILITY", p: "The most widely used port globally, supporting thousands of device types via the 'Universal' standard." },
                     { h: "BUS POWER", p: "Provides 5V power, allowing devices like portable hard drives to run without an external power brick." }
                 ]
